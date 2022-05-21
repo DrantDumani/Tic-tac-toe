@@ -1,65 +1,88 @@
-//use IIFE for gameboard
-const plyr1 = {
-    piece: "X"
-}
-
-const plyr2 = {
-    piece: "O"
-}
-
+//separate game, player, and DOM logic
+//use IIFE for gameboard and game logic
 const gameBoard = (() => {
-    const board = document.querySelector(".game-board")
-    let currPlyr = null
-    const setCurrPlyr = () => {
-        currPlyr = currPlyr === plyr1 ? plyr2 : plyr1
+    const board = ["", "", "", "", "", "", "", "", ""]
+    const editBoard = (index, str) => {
+        board[index] = str
     }
-
-    let turnCount = 0
-    const setTurnCount = (num) => { turnCount = num }
-
-    const boardArr = []
-    const editBoardArr = (index, str = "") => { boardArr[index] = str }
-    const takeTurn = (index, elem, text) => {
-        elem.textContent = text
-        editBoardArr(index, text)
-        setCurrPlyr()
-        setTurnCount(turnCount += 1)
-        console.log(turnCount)
-    }
-
-    const init = () => {
-        currPlyr = plyr1
-        for (let ind = 0; ind < 9; ind += 1) {
-
-            let button = document.createElement("button")
-            button.addEventListener("click", (e) => {
-                takeTurn(ind, e.target, currPlyr.piece)
-            })
-
-            board.appendChild(button)
-            editBoardArr(ind)
+    const resetBoard = () => {
+        for (let i = 0; i < board.length; i++) {
+            board[i] = ""
         }
     }
-    return { init, setCurrPlyr, setTurnCount }
+
+    const getBoardSpace = (index) => board[index]
+    return { editBoard, resetBoard, getBoardSpace }
 })()
 
-gameBoard.init()
+const gameLogic = (() => {
+    let turnCount = 0
+    let gameState = "playing"
+    const setTurnCount = (num) => { turnCount = num }
+    const resetTurnCount = () => setTurnCount(0)
 
-// function initGame() {
-//     const gameBoard = document.querySelector(".game-board")
-//     for (let index = 0; index < 9; index += 1) {
-//         let button = document.createElement("button")
-//         button.addEventListener("click", () => {
-//             globalGameTest[index] = "X"
-//             button.textContent = "X"
-//             console.log(index, globalGameTest)
-//         })
+    const players = ["X", "O"]
+    let currPlyr = players[0]
 
-//         gameBoard.appendChild(button)
-//         globalGameTest.push("")
-//     }
-// }
+    const checkVictory = (index) => {
+        let neighbors = null
+        let space = gameBoard.getBoardSpace(index)
 
-// const globalGameTest = []
+        switch (index) {
+            case 0:
+                neighbors = [1, 2, 3, 6, 4, 8]
+                break;
+            case 1:
+                neighbors = [0, 2, 4, 7]
+                break;
+            case 2:
+                neighbors = [0, 1, 5, 8, 4, 6]
+                break;
+            case 3:
+                neighbors = [4, 5, 0, 6]
+                break;
+            case 4:
+                neighbors = [0, 8, 1, 7, 2, 6, 3, 5]
+                break
+            case 5:
+                neighbors = [3, 4, 2, 8]
+                break
+            case 6:
+                neighbors = [0, 3, 7, 8]
+                break;
+            case 7:
+                neighbors = [1, 4, 6, 8]
+                break;
+            case 8:
+                neighbors = [2, 5, 6, 7, 0, 4]
+        }
 
-// initGame()
+        for (let s = 0; s < neighbors.length; s += 2) {
+            if (space === gameBoard.getBoardSpace(neighbors[s]) &&
+                space === gameBoard.getBoardSpace(neighbors[s + 1])) {
+                gameState = "game over"
+                console.log(`${currPlyr} has won the game`)
+            }
+        }
+    }
+
+    const takeTurn = (index) => {
+        if ((gameBoard.getBoardSpace(index) !== "") || gameState !== "playing") return
+        gameBoard.editBoard(index, currPlyr)
+
+        if (turnCount >= 3) checkVictory(index)
+        setTurnCount(turnCount + 1)
+        currPlyr = players[(players.indexOf(currPlyr) + 1) % players.length]
+    }
+    return { setTurnCount, resetTurnCount, takeTurn }
+})()
+
+let boardElem = document.querySelector(".game-board")
+let spaces = boardElem.querySelectorAll("button")
+
+for (let i = 0; i < spaces.length; i++) {
+    spaces[i].addEventListener("click", (e) => {
+        gameLogic.takeTurn(i)
+        e.target.textContent = gameBoard.getBoardSpace(i)
+    })
+}
