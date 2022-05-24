@@ -1,5 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+* {
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f3f3f3;
+}
+
+.container {
+    min-height: 100vh;
+    gap: 12vh;
+}
+
+.container,
+.playing-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.container {
+    text-align: center;
+    font-family: 'Press Start 2P', cursive;
+    padding: 0 8px;
+}
+
+.menu-state {
+    display: grid;
+    grid-template: auto auto / 1fr 1fr;
+    gap: 32px;
+}
+
+.plyr-options {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 12px 4px;
+}
+
+.plyr-options>h2 {
+    grid-column: 1 /3;
+}
+
+.plyr-options>label {
+    justify-self: end;
+    align-self: end;
+}
+
+.plyr-options>input,
+.plyr-options>select {
+    padding: 8px;
+}
+
+.start-btn {
+    grid-column: 1 /3;
+    justify-self: center;
+}
+
+.playing-state {
+    gap: 32px;
+}
+
 .game-board {
     display: grid;
     grid-template: repeat(3, 50px) / repeat(3, 50px);
-    gap: 5px;
+}
+
+.plyr-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 64px;
+    text-align: left;
+}
+
+input,
+select {
+    border: 2px solid #000;
+    font-family: inherit;
+}
+
+button {
+    background-color: inherit;
+    font-family: inherit;
+    font-size: 1.3em
+}
+
+.board-btn {
+    border: 3px solid #000;
+    cursor: pointer;
+}
+
+.no-top {
+    border-top: none;
+}
+
+.no-left {
+    border-left: none;
+}
+
+.no-right {
+    border-right: none;
+}
+
+.no-bottom {
+    border-bottom: none;
+}
+
+.state-btn {
+    border-radius: 8px;
+    border: 3px solid #000;
+}
+
+.state-btn:active,
+.state-btn:hover {
+    background-color: #e1e1e1;
+}
+
+.end-game-text {
+    height: 24px;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+.inactive-state {
+    display: none;
 }
