@@ -8,9 +8,10 @@ const gameBoard = (() => {
             board[i] = ""
         }
     }
+    const getBoardInfo = () => [...board]
 
     const getBoardSpace = (index) => board[index]
-    return { editBoard, resetBoard, getBoardSpace }
+    return { getBoardInfo, editBoard, resetBoard, getBoardSpace }
 })()
 
 const gameLogic = (() => {
@@ -83,6 +84,26 @@ const gameLogic = (() => {
         }
     }
 
+    const nextPlayer = () => players[(players.indexOf(currPlyr) + 1) % players.length]
+
+    const cpuHandler = () => {
+        if (currPlyr.getType() === "Human") return
+        const freeIndices = gameBoard.getBoardInfo().reduce((arr, el, ind) => {
+            if (el === "") {
+                return arr.concat(ind)
+            }
+            return arr
+        }, [])
+        if (currPlyr.getType() === "Easy AI") {
+            //randomly pick a free space on the board
+            let randomIndex = freeIndices[Math.floor(Math.random() * freeIndices.length)]
+            takeTurn(randomIndex)
+            let buttons = document.querySelectorAll(".game-board button")
+            buttons[randomIndex].textContent = gameBoard.getBoardSpace(randomIndex)
+        }
+        if (currPlyr.getType() === "Impossible AI") {}
+    }
+
     const takeTurn = (index) => {
         if ((gameBoard.getBoardSpace(index) !== "") || gameState !== "playing") return
         let currStr = players.indexOf(currPlyr) === 0 ? "X" : "O"
@@ -91,10 +112,20 @@ const gameLogic = (() => {
         setTurnCount(turnCount + 1)
         if (turnCount >= 5) checkVictory(index)
         if (gameState === "playing") {
-            currPlyr = players[(players.indexOf(currPlyr) + 1) % players.length]
+            currPlyr = nextPlayer()
+            cpuHandler()
         }
     }
-    return { getPlayers, setPlayers, setTurnCount, resetTurnCount, takeTurn, setGameState, getGameState }
+    return {
+        getPlayers,
+        setPlayers,
+        setTurnCount,
+        resetTurnCount,
+        takeTurn,
+        setGameState,
+        getGameState,
+        cpuHandler
+    }
 })()
 
 let boardElem = document.querySelector(".game-board")
@@ -128,12 +159,14 @@ startBttn.addEventListener("click", () => {
     }
     gameLogic.setGameState("playing")
     stateManager()
+    gameLogic.cpuHandler()
 })
 
 let restartBtn = document.querySelector(".restart-btn")
 restartBtn.addEventListener("click", () => {
     gameLogic.setGameState("playing")
     stateManager()
+    gameLogic.cpuHandler()
 })
 
 let menuBtn = document.querySelector(".menu-btn")
