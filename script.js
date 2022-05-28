@@ -32,9 +32,9 @@ const gameLogic = (() => {
     }
     const getPlayers = () => players
 
-    const checkVictory = (index) => {
+    const checkVictory = (index, board) => {
         let neighbors = null
-        let space = gameBoard.getBoardSpace(index)
+        let space = board[index]
 
         switch (index) {
             case 0:
@@ -66,22 +66,10 @@ const gameLogic = (() => {
         }
 
         for (let s = 0; s < neighbors.length; s += 2) {
-            if (space === gameBoard.getBoardSpace(neighbors[s]) &&
-                space === gameBoard.getBoardSpace(neighbors[s + 1])) {
-                let endText = `${currPlyr.getName()} has won the game`
-                currPlyr.setScore(1)
-                setEndText(endText)
-                gameState = "game over"
-                currPlyr = players[0]
-                stateManager()
-                break
-            }
+            let positions = neighbors.slice(s, s + 2)
+            if (positions.every(el => board[el] === space)) return true
         }
-        if (turnCount >= 9 && gameState === "playing") {
-            setEndText("It was a tie!")
-            gameState = "game over"
-            currPlyr = players[0]
-        }
+        return false
     }
 
     const nextPlayer = () => players[(players.indexOf(currPlyr) + 1) % players.length]
@@ -95,7 +83,6 @@ const gameLogic = (() => {
             return arr
         }, [])
         if (currPlyr.getType() === "Easy AI") {
-            //randomly pick a free space on the board
             let randomIndex = freeIndices[Math.floor(Math.random() * freeIndices.length)]
             takeTurn(randomIndex)
             let buttons = document.querySelectorAll(".game-board button")
@@ -106,11 +93,25 @@ const gameLogic = (() => {
 
     const takeTurn = (index) => {
         if ((gameBoard.getBoardSpace(index) !== "") || gameState !== "playing") return
-        let currStr = players.indexOf(currPlyr) === 0 ? "X" : "O"
+            // let currStr = players.indexOf(currPlyr) === 0 ? "X" : "O"
+        let currStr = currPlyr.getStr()
         gameBoard.editBoard(index, currStr)
 
         setTurnCount(turnCount + 1)
-        if (turnCount >= 5) checkVictory(index)
+        if (turnCount >= 5) {
+            if (checkVictory(index, gameBoard.getBoardInfo())) {
+                currPlyr.setScore(1)
+                setEndText(`${currPlyr.getName()} has won the game!`)
+                currPlyr = players[0]
+                gameState = "game over"
+                stateManager()
+            }
+            if (turnCount >= 9 && gameState === "playing") {
+                setEndText("It was a tie!")
+                gameState = "game over"
+                stateManager()
+            }
+        }
         if (gameState === "playing") {
             currPlyr = nextPlayer()
             cpuHandler()
@@ -138,13 +139,15 @@ for (let i = 0; i < spaces.length; i++) {
     })
 }
 
-function createPlayers(name, type) {
+function createPlayers(name, type, index) {
     const getName = () => name
     const getType = () => type
     let score = 0
     const setScore = (num) => { score += num }
     const getScore = () => score
-    return { getName, getType, setScore, getScore }
+    const str = index === 0 ? "X" : "O"
+    const getStr = () => str
+    return { getName, getType, setScore, getScore, getStr }
 }
 
 let startBttn = document.querySelector(".start-btn")
@@ -153,7 +156,7 @@ startBttn.addEventListener("click", () => {
     for (let i = 0; i < plyrDivs.length; i++) {
         let name = plyrDivs[i].querySelector("input").value || `Player ${i+1}`
         let type = plyrDivs[i].querySelector("select").value
-        let plyr = createPlayers(name, type)
+        let plyr = createPlayers(name, type, i)
         gameLogic.setPlayers(plyr, i)
         gameLogic.setTurnCount(0)
     }
