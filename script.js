@@ -93,7 +93,8 @@ const gameLogic = (() => {
 
     const takeTurn = (index) => {
         if ((gameBoard.getBoardSpace(index) !== "") || gameState !== "playing") return
-        let currStr = players.indexOf(currPlyr) === 0 ? "X" : "O"
+            // let currStr = players.indexOf(currPlyr) === 0 ? "X" : "O"
+        let currStr = currPlyr.getStr()
         gameBoard.editBoard(index, currStr)
 
         setTurnCount(turnCount + 1)
@@ -138,13 +139,15 @@ for (let i = 0; i < spaces.length; i++) {
     })
 }
 
-function createPlayers(name, type) {
+function createPlayers(name, type, index) {
     const getName = () => name
     const getType = () => type
     let score = 0
     const setScore = (num) => { score += num }
     const getScore = () => score
-    return { getName, getType, setScore, getScore }
+    const str = index === 0 ? "X" : "O"
+    const getStr = () => str
+    return { getName, getType, setScore, getScore, getStr }
 }
 
 let startBttn = document.querySelector(".start-btn")
@@ -153,7 +156,7 @@ startBttn.addEventListener("click", () => {
     for (let i = 0; i < plyrDivs.length; i++) {
         let name = plyrDivs[i].querySelector("input").value || `Player ${i+1}`
         let type = plyrDivs[i].querySelector("select").value
-        let plyr = createPlayers(name, type)
+        let plyr = createPlayers(name, type, i)
         gameLogic.setPlayers(plyr, i)
         gameLogic.setTurnCount(0)
     }
