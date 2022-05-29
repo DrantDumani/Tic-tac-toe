@@ -137,6 +137,14 @@ button {
     display: none;
 }
 
+svg {
+    transition: 0.4s;
+}
+
+svg:hover {
+    transform: rotate(360deg);
+}
+
 @media (max-width: 500px) {
     .plyr-info {
         text-align: center;
