@@ -1,6 +1,3 @@
-//temp value
-let minimaxCalls = 0
-
 const gameBoard = (() => {
     const board = ["", "", "", "", "", "", "", "", ""]
     const editBoard = (index, str) => {
@@ -77,11 +74,10 @@ const gameLogic = (() => {
 
     const nextPlayer = () => players[(players.indexOf(currPlyr) + 1) % players.length]
 
-    const minimax = (board, index, alpha, beta, isMax) => {
-        minimaxCalls += 1
+    const minimax = (board, index, alpha, beta, isMax, depth) => {
         if (checkVictory(index, board)) {
             return board[index] === currPlyr.getStr() ? 1 : -1
-        } else if (board.filter(el => el === "").length === 0) {
+        } else if (board.filter(el => el === "").length === 0 || depth === 0) {
             return 0
         }
         let score
@@ -91,7 +87,7 @@ const gameLogic = (() => {
             for (let j = 0; j < board.length; j++) {
                 if (board[j] === "") {
                     board[j] = minOrMaxPlayer.getStr()
-                    score = minimax(board, j, alpha, beta, false)
+                    score = minimax(board, j, alpha, beta, false, depth - 1)
                     board[j] = ""
                     bestScore = Math.max(score, bestScore)
                     alpha = Math.max(score, alpha)
@@ -105,7 +101,7 @@ const gameLogic = (() => {
             for (let j = 0; j < board.length; j++) {
                 if (board[j] === "") {
                     board[j] = minOrMaxPlayer.getStr()
-                    score = minimax(board, j, alpha, beta, true)
+                    score = minimax(board, j, alpha, beta, true, depth - 1)
                     board[j] = ""
                     bestScore = Math.min(score, bestScore)
                     beta = Math.min(score, beta)
@@ -117,22 +113,26 @@ const gameLogic = (() => {
     }
 
     const cpuHandler = () => {
-        if (currPlyr.getType() === "Human") return
-        else {
-            const freeIndices = gameBoard.getBoardInfo().reduce((arr, el, ind) => {
-                if (el === "") {
-                    return arr.concat(ind)
-                }
-                return arr
-            }, [])
-            let chosenIndex
-            if (currPlyr.getType() === "Easy AI") {
+        let plyrType = currPlyr.getType()
+        const freeIndices = gameBoard.getBoardInfo().reduce((arr, el, ind) => {
+            if (el === "") {
+                return arr.concat(ind)
+            }
+            return arr
+        }, [])
+        let chosenIndex
+        switch (plyrType) {
+            case "Human":
+                return
+            case "Easy AI":
                 let randomIndex = freeIndices[Math.floor(Math.random() * freeIndices.length)]
                 chosenIndex = randomIndex
                 let buttons = document.querySelectorAll(".game-board button")
                 buttons[randomIndex].textContent = gameBoard.getBoardSpace(randomIndex)
-            }
-            if (currPlyr.getType() === "Impossible AI") {
+                break
+            case "Normal AI":
+            case "Impossible AI":
+                let depth = plyrType === "Impossible AI" ? Infinity : 2
                 let testBoard = [...gameBoard.getBoardInfo()]
                 let bestIndex
                 let bestScore = -Infinity
@@ -140,7 +140,7 @@ const gameLogic = (() => {
                 for (let i = 0; i < testBoard.length; i++) {
                     if (testBoard[i] === "") {
                         testBoard[i] = currPlyr.getStr()
-                        let score = minimax(testBoard, i, -Infinity, Infinity, false)
+                        let score = minimax(testBoard, i, -Infinity, Infinity, false, depth)
                         testBoard[i] = ""
                         if (score > bestScore) {
                             bestScore = score
@@ -149,13 +149,11 @@ const gameLogic = (() => {
                     }
                 }
                 chosenIndex = bestIndex
-                console.log(minimaxCalls)
-                minimaxCalls = 0
-            }
-            takeTurn(chosenIndex)
-            let buttons = document.querySelectorAll(".game-board button")
-            buttons[chosenIndex].textContent = gameBoard.getBoardSpace(chosenIndex)
+                break;
         }
+        takeTurn(chosenIndex)
+        let buttons = document.querySelectorAll(".game-board button")
+        buttons[chosenIndex].textContent = gameBoard.getBoardSpace(chosenIndex)
     }
 
     const takeTurn = (index) => {
