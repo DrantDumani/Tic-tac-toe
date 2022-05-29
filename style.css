@@ -11,7 +11,7 @@ body {
 
 .container {
     min-height: 100vh;
-    gap: 12vh;
+    gap: 6vh;
 }
 
 .container,
@@ -31,6 +31,13 @@ body {
     display: grid;
     grid-template: auto auto / 1fr 1fr;
     gap: 32px;
+}
+
+@media (max-width: 500px) {
+    .menu-state {
+        display: flex;
+        flex-direction: column;
+    }
 }
 
 .plyr-options {
@@ -128,4 +135,20 @@ button {
 
 .inactive-state {
     display: none;
+}
+
+@media (max-width: 500px) {
+    .plyr-info {
+        text-align: center;
+    }
+    .state-btn {
+        margin: 8px 0;
+    }
+    .menu-state label {
+        font-size: 14px;
+    }
+    input,
+    select {
+        font-size: 10px;
+    }
 }
