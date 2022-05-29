@@ -165,19 +165,21 @@ const gameLogic = (() => {
         if (turnCount >= 5) {
             if (checkVictory(index, gameBoard.getBoardInfo())) {
                 currPlyr.setScore(1)
-                setEndText(`${currPlyr.getName()} has won the game!`)
+                setGameInfo(`${currPlyr.getName()} has won the game!`)
                 currPlyr = players[0]
                 gameState = "game over"
                 stateManager()
             }
             if (turnCount >= 9 && gameState === "playing") {
-                setEndText("It was a tie!")
+                setGameInfo("It was a tie!")
                 gameState = "game over"
                 stateManager()
             }
         }
         if (gameState === "playing") {
             currPlyr = nextPlayer()
+            console.log(currPlyr.getName())
+            setGameInfo(`${currPlyr.getName()}'s turn`)
             cpuHandler()
         }
     }
@@ -267,13 +269,13 @@ function stateManager() {
             let p1Name = document.querySelector(".p1-name")
             let p2Name = document.querySelector(".p2-name")
 
-            let endText = document.querySelector(".end-game-text")
+            let gameInfo = document.querySelector(".game-info-text")
 
             p1Name.textContent = players[0].getName()
             p1Score.textContent = players[0].getScore()
             p2Name.textContent = players[1].getName()
             p2Score.textContent = players[1].getScore()
-            endText.textContent = ""
+            gameInfo.textContent = `${players[0].getName()}'s turn.`
 
             for (let i = 0; i < spaces.length; i++) {
                 spaces[i].textContent = gameBoard.getBoardSpace(i)
@@ -285,9 +287,9 @@ function stateManager() {
     }
 }
 
-function setEndText(str) {
-    let endText = document.querySelector(".end-game-text")
-    endText.textContent = str
+function setGameInfo(str) {
+    let gameInfo = document.querySelector(".game-info-text")
+    gameInfo.textContent = str
 }
 
 gameLogic.setGameState("menu")
